@@ -1,0 +1,78 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "main-ui.fullname" . }}
+  labels:
+    {{- include "main-ui.labels" . | nindent 4 }}
+data:
+  nginx.conf: |-
+    user  nginx;
+    worker_processes  auto;
+
+    error_log  /var/log/nginx/error.log warn;
+    pid        /var/run/nginx.pid;
+    events {
+        worker_connections  10000;
+    }
+    http {
+        include       /etc/nginx/mime.types;
+        default_type  application/octet-stream;
+        log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+
+    access_log  /var/log/nginx/access.log  main;
+    map $http_upgrade $connection_upgrade {  
+    default upgrade;
+    ''      close;
+    }
+
+    sendfile        on;
+    #tcp_nopush     on;
+
+    keepalive_timeout  65;
+
+    #gzip  on;
+
+    include /etc/nginx/conf.d/*.conf;
+
+    }
+  default.conf: |-
+    server {
+      listen      80;
+      server_name main.thpay.cc;
+      location / {
+          root /data/www/web/html/;
+          index index.html index.htm;
+      }
+      charset utf-8;
+      default_type text/html;
+      index index.html;
+
+      client_max_body_size 200m;
+      server_tokens off;
+      gzip on;
+      gzip_min_length 1k;
+      gzip_buffers 4 16k;
+      gzip_http_version 1.0;
+      gzip_disable "MSIE [1-6]\.(?!.*SV1)";
+      gzip_vary on;
+      gzip_comp_level 9;
+      gzip_proxied any;
+
+      location = /health-check {
+        default_type text/plain;
+        access_log off;
+        error_log off;
+        return 200 'ok';
+      }
+
+      location /api/ {
+      proxy_pass http://integrate-web-main:8000/;
+      proxy_http_version 1.1;
+      proxy_set_header Host $host;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection $connection_upgrade;
+     }
+     
+    }

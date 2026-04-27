@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "main-ui.fullname" . }}
+  labels:
+    {{- include "main-ui.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "main-ui.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "main-ui.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "main-ui.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          volumeMounts:
+            - name: nginx-conf
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+          livenessProbe:
+            httpGet:
+              path: /health-check
+              port: http
+            initialDelaySeconds: 15 # 容器启动后多少秒开始第一次检查
+            periodSeconds: 10       # 检查间隔时间，每隔多少秒进行一次健康检查
+            timeoutSeconds: 5       # 检查超时时间，如果在此时间内没有响应则认为检查失败
+            successThreshold: 1     # 连续多少次检查成功后，容器被认为是活跃的
+            failureThreshold: 3     # 连续多少次检查失败后，容器被认为是失败的  
+          readinessProbe:
+            httpGet:
+              path: /health-check
+              port: http
+            initialDelaySeconds: 15 # 容器启动后多少秒开始第一次检查
+            periodSeconds: 10       # 检查间隔时间，每隔多少秒进行一次健康检查
+            timeoutSeconds: 5       # 检查超时时间，如果在此时间内没有响应则认为检查失败
+            successThreshold: 1     # 连续多少次检查成功后，容器被认为是活跃的
+            failureThreshold: 3     # 连续多少次检查失败后，容器被认为是失败的
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: nginx-conf
+          configMap:
+            name: {{ include "main-ui.fullname" . }}      
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
