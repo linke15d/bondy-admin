@@ -117,6 +117,41 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
       }
     ]
   },
+  {
+    path: '/content',
+    component: Layout,
+    redirect: '/content',
+    name: 'Content',
+    meta: {
+      title: '内容管理',
+      icon: 'fluent:content-view-24-filled',
+      alwaysShow: true
+    },
+    children: [
+      {
+        path: 'position',
+        component: () => import('@/views/Content/Position.vue'),
+        name: 'Position',
+        meta: {
+          title: '姿势列表',
+          icon: '',
+          noCache: true,
+          affix: true
+        },
+      },
+      {
+        path: 'tags',
+        component: () => import('@/views/Content/Tags.vue'),
+        name: 'Tags',
+        meta: {
+          title: '标签列表',
+          icon: '',
+          noCache: true,
+          affix: true
+        },
+      },
+    ]
+  },
 ]
 
 const router = createRouter({
