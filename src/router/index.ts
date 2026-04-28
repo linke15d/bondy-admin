@@ -59,11 +59,12 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
   {
     path: '/dashboard',
     component: Layout,
-    redirect: '/dashboard/analysis',
+    redirect: '/dashboard',
     name: 'Dashboard',
     meta: {
       title: '首页',
-      icon: ''
+      icon: 'tabler:home-filled',
+      alwaysShow: true
     },
     children: [
       {
@@ -71,11 +72,48 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
         component: () => import('@/views/Dashboard/Analysis.vue'),
         name: 'Analysis',
         meta: {
-          title: '首页',
-          icon: 'tabler:home-filled',
+          title: '仪表台',
+          icon: '',
           noCache: true,
           affix: true
         }
+      }
+    ]
+  },
+  {
+    path: '/user',
+    component: Layout,
+    redirect: '/user',
+    name: 'User',
+    meta: {
+      title: '用户管理',
+      icon: 'solar:user-bold',
+      alwaysShow: true
+    },
+    children: [
+      {
+        path: 'userList',
+        component: () => import('@/views/User/UserList.vue'),
+        name: 'UserList',
+        meta: {
+          title: '用户列表',
+          icon: '',
+          noCache: true,
+          affix: true
+        },
+        children: [
+          {
+            path: 'userDetails',
+            component: () => import('@/views/User/Deatils/UserDetails.vue'),
+            name: 'UserDetails',
+            meta: {
+              title: '用户详情',
+              icon: '',
+              noCache: true,
+              affix: true
+            }
+          }
+        ]
       }
     ]
   },

@@ -74,7 +74,7 @@ watch(
         :class="[
           'ml-10px text-16px font-700',
           {
-            'text-[var(--logo-title-text-color)]': layout === 'classic',
+            'text-[#000]': layout === 'classic',
             'text-[var(--top-header-text-color)]':
               layout === 'topLeft' || layout === 'top' || layout === 'cutMenu'
           }
