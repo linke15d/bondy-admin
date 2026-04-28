@@ -10,7 +10,7 @@ import Cookies from 'js-cookie'
 import { encrypt, decrypt } from '@/utils/jsencrypt.util'
 import { setToken } from '@/utils/auth.util'
 import userInfoStore from '@/store/modules/user'
-import { captcha, login } from '../service'
+import { login } from '../service'
 
 const userStore = userInfoStore()
 const permissionStore = usePermissionStore()
@@ -19,11 +19,8 @@ const { currentRoute, addRoute, push } = useRouter()
 const loginForm: any = ref({
   username: '',
   password: '',
-  captcha_answer: '',
-  captcha_id: '',
   remember: false
 })
-const captchaImg = ref('')
 
 const schema = reactive<FormSchema[]>([
   {
@@ -102,15 +99,6 @@ const getCookie = () => {
   }
 }
 
-//获取验证码
-const getCaptcha = async () => {
-  const res = await captcha()
-  if (res.code === 0) {
-    captchaImg.value = res.data.b64s
-    loginForm.value.captcha_id = res.data.id
-  }
-}
-
 // 登录
 const signIn = async () => {
   if (loginForm.value.remember) {
@@ -140,8 +128,6 @@ const signIn = async () => {
     const params = {
       username: loginForm.value.username,
       password: loginForm.value.password,
-      captcha_answer: loginForm.value.captcha_answer,
-      captcha_id: loginForm.value.captcha_id,
     }
 
     const res = await login(params)
@@ -150,7 +136,7 @@ const signIn = async () => {
         message: '登录成功',
         type: 'success'
       })
-      setToken(res.data.token)
+      setToken(res.data.access_token)
       userStore.setUserInfo(res.data)
       await permissionStore.generateRoutes('admin').catch(() => { })
       permissionStore.getAddRouters.forEach((route) => {
@@ -158,12 +144,9 @@ const signIn = async () => {
       })
       permissionStore.setIsAddRouters(true)
       push('/dashboard/analysis')
-    } else {
-      getCaptcha()
     }
   } catch (error: any) {
     console.log(error)
-    getCaptcha()
   }
 }
 
@@ -176,14 +159,13 @@ const onSubmitKeyup = (e) => {
 
 onMounted(() => {
   getCookie()
-  getCaptcha()
 })
 </script>
 
 <template>
   <div class="w-109.5 max-w-[100vw] bg-white h-132 p-7 _form">
     <div class="pt-2 pb-4.5 border-b border-[#ECEDEF]">
-      <p class="text-xl font-medium"> 欢迎<span class="text-[#007AFF]">登陆</span>海兔后台管理系统 </p>
+      <p class="text-xl font-medium"> 欢迎登陆<span class="text-[#007AFF]">Bondy</span>后台管理系统 </p>
     </div>
     <Form :schema="schema" label-position="top" hide-required-asterisk size="large">
       <template #username>
@@ -198,22 +180,10 @@ onMounted(() => {
 
       <template #password>
         <div class="w-full">
-          <ElInput v-model="loginForm.password" type="password" show-password placeholder="请输入密码">
+          <ElInput v-model="loginForm.password" type="password" show-password placeholder="请输入密码"
+            v-on:keyup.enter.native="onSubmitKeyup">
             <template #prefix>
               <img src="../../../assets/imgs/password.png" class="w-5 h-5" />
-            </template>
-          </ElInput>
-        </div>
-      </template>
-
-      <template #vcode>
-        <div class="flex justify-between w-full">
-          <ElInput v-model="loginForm.captcha_answer" placeholder="请输入验证码" v-on:keyup.enter.native="onSubmitKeyup">
-            <template #prefix>
-              <img src="../../../assets/imgs/google.png" class="w-5 h-5" />
-            </template>
-            <template #suffix>
-              <img :src="captchaImg" class="h-12 cursor-pointer" @click="getCaptcha()" />
             </template>
           </ElInput>
         </div>

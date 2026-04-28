@@ -23,7 +23,7 @@ export const constantRouterMap: AppRouteRecordRaw[] = [
     children: [
       {
         path: '/redirect/:path(.*)',
-        name: 'Redirect',
+        name: 'Redirecta',
         component: () => import('@/views/Redirect/Redirect.vue'),
         meta: {}
       }
@@ -77,48 +77,6 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
           affix: true
         }
       }
-    ]
-  },
-  {
-    path: '/adManage',
-    component: Layout,
-    redirect: '/adManage',
-    name: 'AdManage',
-    meta: {
-      title: '广告管理',
-      icon: 'icon-park-solid:ad'
-    },
-    children: [
-      {
-        path: 'list',
-        component: () => import('@/views/AdManage/AdManage.vue'),
-        name: 'AdsList',
-        meta: {
-          title: '广告列表',
-          icon: 'icon-park-solid:ad'
-        }
-      },
-    ]
-  },
-  {
-    path: '/version',
-    component: Layout,
-    redirect: '/version',
-    name: 'Version',
-    meta: {
-      title: '版本管理',
-      icon: 'iconoir:app-store-solid'
-    },
-    children: [
-      {
-        path: 'list',
-        component: () => import('@/views/Version/Version.vue'),
-        name: 'VersionList',
-        meta: {
-          title: '版本列表',
-          icon: 'iconoir:app-store-solid'
-        }
-      },
     ]
   },
 ]

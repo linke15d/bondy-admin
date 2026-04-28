@@ -7,19 +7,13 @@ interface UerInfoProp {
   roles: Array<string>
   permissions: Array<string>
   token: string
-  user: UserProp
+  user: any
   currAccess: CurrProps
 }
 
 // 权限对象
 interface CurrProps {
   [propsName: string]: string
-}
-interface UserProp {
-  isAdmin: boolean
-  token: string
-  username: string
-  nickName: string
 }
 
 const userInfoStore = defineStore(
@@ -29,18 +23,13 @@ const userInfoStore = defineStore(
       roles: [],
       permissions: [],
       token: '',
-      user: {
-        isAdmin: true,
-        username: '',
-        token: '',
-        nickName: '',
-      },
+      user: {},
       // 当前用户所处路由权限
       currAccess: {}
     })
 
     // 用户信息
-    const getUserInfo = (): UserProp => state.user
+    const getUserInfo = (): any => state.user
     // 获取token
     const getToken = (): string => state.token
     // 用户权限
@@ -48,14 +37,9 @@ const userInfoStore = defineStore(
     // 当前页面操作权限
     const getPathAuth = (): CurrProps => state.currAccess
     // 保存信息
-    const setUserInfo = (data: UserProp) => {
+    const setUserInfo = (data: any) => {
       state.token = data.token
-      state.user = {
-        isAdmin: data.isAdmin,
-        username: data.username,
-        token: data.token,
-        nickName: data.nickName,
-      }
+      state.user = data.admin
       setStorage('userInfo', JSON.stringify(data))
     }
 
