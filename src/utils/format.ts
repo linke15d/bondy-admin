@@ -52,3 +52,8 @@ export const tableFormatterFn = (row: any, column: any) => {
 
     return value;
 };
+
+//判断数组某一个元素是否为空
+export const isFieldEmpty = (arr, field) => {
+    return arr.some((obj) => obj[field] === '' || obj[field] === null || obj[field] === undefined);
+};

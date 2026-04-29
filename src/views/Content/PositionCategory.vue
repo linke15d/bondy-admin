@@ -1,6 +1,6 @@
 <template>
-    <el-form :model="form" size="small">
-        <el-card class="my-4">
+    <el-form size="small">
+        <el-card class="mb-4">
             <el-row class="mb-4">
                 <el-form-item>
                     <el-button type="success" size="small" @click="onWrite(null)">
@@ -9,21 +9,16 @@
                 </el-form-item>
             </el-row>
             <el-table :data="tableList" style="width: 100%" size="small">
-                <el-table-column prop="name" label="语言名称" align="center" width="100" show-overflow-tooltip
-                    :formatter="tableFormatterFn" />
-                <el-table-column prop="code" label="语言编码" align="center" show-overflow-tooltip
+                <el-table-column prop="name" label="分类名称" align="center" width="100" show-overflow-tooltip
                     :formatter="tableFormatterFn" />
                 <el-table-column label="状态" align="center">
                     <template #default="{ row }">
                         <el-tag :type="tagType(row.is_active)">{{ row.is_active ? '启用' : '禁用' }}</el-tag>
                     </template>
                 </el-table-column>
-                <el-table-column label="是否默认" align="center">
-                    <template #default="{ row }">
-                        <el-tag :type="tagType(row.is_default)">{{ row.is_default ? '是' : '否' }}</el-tag>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="created_at" label="创建时间" align="center" width="150" show-overflow-tooltip
+                <el-table-column prop="created_at" label="创建时间" align="center" show-overflow-tooltip
+                    :formatter="tableFormatterFn" />
+                <el-table-column prop="updated_at" label="更新时间" align="center" show-overflow-tooltip
                     :formatter="tableFormatterFn" />
                 <el-table-column label="操作" align="center" fixed="right">
                     <template #default="{ row }">
@@ -41,24 +36,18 @@
                 </el-table-column>
             </el-table>
         </el-card>
-
-        <LangEdit :dialogVisible="dialogVisible" :itemData="itemData" @close="onClose" />
+        <CategoryEdit :dialogVisible="dialogVisible" :itemData="itemData" @close="onClose" />
     </el-form>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onActivated, reactive } from 'vue'
-import { langQuery, langDelete } from './service';
+import { ref, onMounted, onActivated } from 'vue'
+import { categoriesQuery, categoriesDelete } from './service';
 import { tableFormatterFn } from '@/utils/format';
-import LangEdit from './components/LangEdit.vue';
+import CategoryEdit from './components/CategoryEdit.vue';
 import { tagType } from '@/utils/tagType';
 import { ElMessage } from 'element-plus';
 
-const defaultForm = {
-    is_blocked: '',
-    keyword: '',
-}
-const form = reactive({ ...defaultForm })
 const tableList = ref([])
 const dialogVisible = ref(false)
 const itemData = ref({})
@@ -69,7 +58,7 @@ const onWrite = (data) => {
 }
 
 const onDelete = async (id) => {
-    const res = await langDelete({ id })
+    const res = await categoriesDelete({ id })
     if (res.code === 0) {
         ElMessage.success('操作成功')
         onQueryList()
@@ -82,9 +71,12 @@ const onClose = (type) => {
 }
 
 const onQueryList = async () => {
-    const res = await langQuery()
+    const res = await categoriesQuery()
     if (res.code === 0) {
-        tableList.value = res.data
+        tableList.value = res.data.map((val: any) => ({
+            ...val,
+            name: val.names.find((e: any) => e.language_code === 'zh-CN')?.name || ''
+        }))
     }
 }
 

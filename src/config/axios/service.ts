@@ -160,7 +160,7 @@ service.interceptors.response.use(
                 window.location.replace('#/login');
             });
             if (res.success) {
-                ElMessage.error(response.data.msg);
+                ElMessage.error(response.data.message);
                 clearStorage();
                 tagsViewStore.delAllViews();
                 resetRouter(); // 重置静态路由表
@@ -170,7 +170,7 @@ service.interceptors.response.use(
         } else {
             // 没有code的是默认模版配置的api
             if (response.data.code) {
-                ElMessage.error(response.data.msg);
+                ElMessage.error(response.data.message);
             }
             return response.data;
         }
@@ -192,7 +192,7 @@ service.interceptors.response.use(
             window.location.replace('#/login');
             message = '登录过期，请重新登录';
         } else {
-            message = response?.data.msg || '系统接口' + message.substr(message.length - 3) + '异常';
+            message = response?.data.message || '系统接口' + message.substr(message.length - 3) + '异常';
         }
         ElMessage.error(message);
         return Promise.reject(error);

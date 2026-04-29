@@ -153,6 +153,17 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
     },
     children: [
       {
+        path: 'positionCategory',
+        component: () => import('@/views/Content/PositionCategory.vue'),
+        name: 'PositionCategory',
+        meta: {
+          title: '姿势分类列表',
+          icon: '',
+          noCache: true,
+          affix: true
+        },
+      },
+      {
         path: 'position',
         component: () => import('@/views/Content/Position.vue'),
         name: 'Position',
