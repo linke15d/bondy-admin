@@ -8,6 +8,10 @@ export const positionQuery = (data?): Promise<IResp> => {
 export const positionCreate = (data?): Promise<IResp> => {
     return request.post({ url: '/admin/v1/content/positions/create', data })
 }
+//姿势编辑
+export const positionUpdate = (data?): Promise<IResp> => {
+    return request.post({ url: '/admin/v1/content/positions/update', data })
+}
 //姿势删除
 export const positionDelete = (data?): Promise<IResp> => {
     return request.post({ url: '/admin/v1/content/positions/delete', data })

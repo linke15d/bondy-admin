@@ -4,16 +4,24 @@
             <el-row :gutter="20">
 
                 <el-col :span="4">
-                    <el-form-item label="用户">
-                        <el-input v-model="form.keyword" placeholder="请输入用户邮箱或昵称" clearable />
+                    <el-form-item label="姿势名称">
+                        <el-input v-model="form.keyword" placeholder="请输入姿势名称" clearable />
                     </el-form-item>
                 </el-col>
                 <el-col :span="4">
-                    <el-form-item label="用户状态">
-                        <el-select class="!w-full" v-model="form.is_blocked" clearable>
+                    <el-form-item label="姿势分类">
+                        <el-select class="!w-full" v-model="form.category_id" clearable>
                             <el-option label="全部" value="" />
-                            <el-option label="正常" :value="false" />
-                            <el-option label="禁用" :value="true" />
+                            <el-option v-for="v in categories" :key="v.id" :label="v.default_name" :value="v.id" />
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="4">
+                    <el-form-item label="状态">
+                        <el-select class="!w-full" v-model="form.is_active" clearable>
+                            <el-option label="全部" value="" />
+                            <el-option label="启用" :value="true" />
+                            <el-option label="禁用" :value="false" />
                         </el-select>
                     </el-form-item>
                 </el-col>
@@ -35,27 +43,31 @@
                 </el-form-item>
             </el-row>
             <el-table :data="tableList" style="width: 100%" size="small">
-                <el-table-column prop="name" label="姿势名称" align="center" width="100" show-overflow-tooltip
+                <el-table-column prop="default_name" label="姿势名称" align="center" width="100" show-overflow-tooltip
                     :formatter="tableFormatterFn" />
-                <el-table-column prop="icon_base64" label="姿势图标" align="center" show-overflow-tooltip
+                <el-table-column prop="icon_base64" label="姿势图标" align="center">
+                    <template #default="{ row }">
+                        <el-image :src="row.icon_base64" class="w-10 h-10" />
+                    </template>
+                </el-table-column>
+                <el-table-column label="状态" align="center">
+                    <template #default="{ row }">
+                        <el-tag :type="tagType(row.is_active)">{{ row.is_active ? '启用' : '禁用' }}</el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="created_at" label="添加时间" align="center" show-overflow-tooltip
                     :formatter="tableFormatterFn" />
-                <el-table-column prop="created_at" label="注册时间" align="center" width="150" show-overflow-tooltip
-                    :formatter="tableFormatterFn" />
-                <el-table-column prop="updated_at" label="更新时间" align="center" width="150" show-overflow-tooltip
-                    :formatter="tableFormatterFn" />
+                <!-- <el-table-column prop="updated_at" label="更新时间" align="center" show-overflow-tooltip
+                    :formatter="tableFormatterFn" /> -->
                 <el-table-column label="操作" align="center" fixed="right">
                     <template #default="{ row }">
-                        <el-popconfirm title="确定启用?" @confirm="onChangeState(row.id, false)">
+                        <el-button type="warning" @click="onWrite(row)">
+                            编辑
+                        </el-button>
+                        <el-popconfirm title="确定删除?" @confirm="onDelete(row.id)">
                             <template #reference>
-                                <el-button type="success" v-if="row.is_blocked">
-                                    启用
-                                </el-button>
-                            </template>
-                        </el-popconfirm>
-                        <el-popconfirm title="确定禁用?" @confirm="onChangeState(row.id, true)">
-                            <template #reference>
-                                <el-button type="danger" v-if="!row.is_blocked">
-                                    禁用
+                                <el-button type="danger">
+                                    删除
                                 </el-button>
                             </template>
                         </el-popconfirm>
@@ -67,7 +79,7 @@
         <el-card>
             <el-pagination :current-page="form.page" small v-model:page-size="form.page_size"
                 :page-sizes="[10, 20, 50, 100]" background layout="total, sizes, prev, pager, next, jumper"
-                :total="totalPages" @size-change="handleSizeChange" @current-change="handleCurrentChange" />
+                :total="totalCount" @size-change="handleSizeChange" @current-change="handleCurrentChange" />
         </el-card>
 
         <PositionEdit :dialogVisible="dialogVisible" :itemData="itemData" @close="onClose" />
@@ -76,7 +88,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onActivated, reactive } from 'vue'
-import { positionQuery, } from './service';
+import { positionQuery, categoriesQuery,positionDelete } from './service';
 import { tableFormatterFn } from '@/utils/format';
 import { ElMessage } from 'element-plus';
 import { tagType } from '@/utils/tagType';
@@ -85,27 +97,28 @@ import PositionEdit from './components/PositionEdit.vue';
 const defaultForm = {
     page: 1,
     page_size: 10,
-    is_blocked: '',
+    category_id: '',
     keyword: '',
+    is_active: '' as boolean | string
 }
 const form = reactive({ ...defaultForm })
 const tableList = ref([])
-const totalPages = ref(0)
+const totalCount = ref(0)
 const dialogVisible = ref(false)
 const itemData = ref({})
+const categories = ref<any>([])
 
 const onWrite = (data) => {
     itemData.value = { ...data }
     dialogVisible.value = true
 }
 
-const onChangeState = async (id, type) => {
-    // const apiUrl = type ? userBlock : userUnblock
-    // const res: any = await apiUrl({ id })
-    // if (res.code === 0) {
-    //     ElMessage.success('操作成功')
-    //     onQueryList()
-    // }
+const onDelete = async (id) => {
+    const res = await positionDelete({ id })
+    if (res.code === 0) {
+        ElMessage.success('操作成功')
+        onQueryList()
+    }
 }
 
 const onClose = (type) => {
@@ -117,8 +130,13 @@ const onQueryList = async () => {
     const res = await positionQuery(form)
     if (res.code === 0) {
         tableList.value = res.data.list
-        totalPages.value = res.data.totalCount
+        totalCount.value = res.data.total
     }
+}
+
+const getCategories = async () => {
+    const res = await categoriesQuery()
+    categories.value = res.data
 }
 
 // 选择每页显示条数
@@ -145,6 +163,7 @@ const onReset = () => {
 };
 
 const onLoad = async () => {
+    await getCategories()
     await onQueryList()
 }
 

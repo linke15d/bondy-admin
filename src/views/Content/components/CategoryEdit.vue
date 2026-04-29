@@ -7,7 +7,7 @@
                 <el-input v-model="form.names[i].name" placeholder="请输入分类名称"
                     :disabled="itemData.id && form.names[i].name" clearable />
             </el-form-item>
-            <el-form-item label="是否启用" prop="is_active">
+            <el-form-item label="是否启用" prop="is_active" v-if="itemData.id">
                 <el-select v-model="form.is_active" class="w-full">
                     <el-option label="启用" :value="true" />
                     <el-option label="禁用" :value="false" />

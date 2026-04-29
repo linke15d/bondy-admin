@@ -2,17 +2,16 @@
     <ElDialog :model-value="dialogVisible" :title="itemData?.id ? '编辑姿势' : '新增姿势'" width="450" center
         @close="onClose()">
         <el-form :model="form" :rules="rules" ref="ruleFormRef" size="small" label-width="80">
-            <el-form-item label="姿势分类" prop="category">
-                <el-select v-model="form.category" placeholder="请选择姿势分类" class="w-full" clearable>
-                    <el-option label="经典" value="CLASSIC" />
-                    <el-option label="探险" value="ADVENTURE" />
-                    <el-option label="亲密" value="INTIMATE" />
-                    <el-option label="趣味" value="FUN" />
+            <el-form-item label="姿势分类" prop="category_id">
+                <el-select v-model="form.category_id" placeholder="请选择姿势分类" class="w-full" :disabled="itemData?.id"
+                    clearable>
+                    <el-option v-for="v in categories" :key="v.id" :label="v.default_name" :value="v.id" />
                 </el-select>
             </el-form-item>
             <div class="mb-2">姿势名称</div>
-            <el-form-item v-for="(v, i) in langList" :key="v.id" :label="v.name" :prop="`names.${v.code}`">
-                <el-input v-model="form.names[i].name" placeholder="请输入姿势名称" clearable />
+            <el-form-item v-for="(v, i) in langList" :key="v.id" :label="v.name">
+                <el-input v-model="form.names[i].name" placeholder="请输入姿势名称"
+                    :disabled="itemData?.id && form.names[i].name" clearable />
             </el-form-item>
             <el-form-item label="姿势图标" prop="icon_base64">
                 <template #default>
@@ -30,6 +29,12 @@
                     </div>
                 </template>
             </el-form-item>
+            <el-form-item label="是否启用" prop="is_active" v-if="itemData.id">
+                <el-select v-model="form.is_active" class="w-full">
+                    <el-option label="启用" :value="true" />
+                    <el-option label="禁用" :value="false" />
+                </el-select>
+            </el-form-item>
         </el-form>
         <template #footer>
             <el-button @click="onClose">取消</el-button>
@@ -41,7 +46,7 @@
 <script setup lang="ts">
 import { ElMessage, UploadProps } from 'element-plus'
 import { reactive, ref, watch } from 'vue'
-import { positionCreate } from '../service'
+import { positionCreate, categoriesQuery, positionUpdate } from '../service'
 import { langQuery } from '@/views/Lang/service'
 
 const props = defineProps({
@@ -51,34 +56,34 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 
 const defaultForm = {
-    category: '',
+    id: '',
+    category_id: '',
     icon_base64: '',
+    is_active: true,
     names: [] as { language_code: string, name: string }[],
 }
 const form = reactive({ ...defaultForm })
 const rules = reactive({
-    category: [{ required: true, message: '请选择姿势分类', trigger: ['blur', 'change'] }],
+    category_id: [{ required: true, message: '请选择姿势分类', trigger: ['blur', 'change'] }],
     icon_base64: [{ required: true, message: '请上传图标', trigger: ['blur', 'change'] }],
 })
 const ruleFormRef = ref()
 const langList = ref<any>([])
+const categories = ref<any>([])
 
 const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
     if (rawFile.type !== 'image/jpeg' && rawFile.type !== 'image/png') {
         ElMessage.error('图片格式必须得是png/jep/jpg');
         return false;
     }
-    // else if (rawFile.size / 1024 / 1024 > 1) {
-    //     ElMessage.error('图片大小不能超过1MB!');
-    //     return false;
-    // }
     return true;
 };
 
 const onSave = async () => {
     await ruleFormRef.value.validate(async (valid) => {
         if (!valid) return
-        const res = await positionCreate(Object.assign({ ...form }))
+        const apiUrl = props.itemData.id ? positionUpdate : positionCreate
+        const res = await apiUrl(Object.assign({ ...form }))
         if (res.code === 0) {
             ElMessage.success('操作成功')
             emit('close', true)
@@ -98,17 +103,32 @@ const uploadHttpClose = async ({ file }) => {
 const getLangs = async () => {
     const res = await langQuery()
     langList.value = res.data
-    // 用语言列表初始化 names 数组
-    form.names = res.data.map((lang: any) => ({
-        language_code: lang.code,
-        name: ''
-    }))
-    // 动态生成 rules
-    res.data.forEach((_: any, index: number) => {
-        rules[`names.${index}.name`] = [
-            { required: true, message: `请输入${res.data[index].name}名称`, trigger: ['blur', 'change'] }
-        ]
+
+    // 初始化 names，编辑时回显已有数据
+    form.names = res.data.map((lang: any) => {
+        const existing = props.itemData?.names?.find(
+            (n: any) => n.language_code === lang.code
+        )
+        return {
+            language_code: lang.code,
+            name: existing?.name || ''
+        }
     })
+
+    console.log(form.names, 'form.names')
+
+    // 回显其他字段
+    if (props.itemData?.id) {
+        form.id = props.itemData.id
+        form.category_id = props.itemData.category_id
+        form.icon_base64 = props.itemData.icon_base64
+        form.is_active = props.itemData.is_active
+    }
+}
+//姿势分类
+const getCategories = async () => {
+    const res = await categoriesQuery()
+    categories.value = res.data
 }
 
 const resetForm = () => {
@@ -126,7 +146,10 @@ const onClose = () => {
     resetForm()
 }
 
-watch(() => props.dialogVisible, (val) => {
-    if (val) getLangs()
+watch(() => props.dialogVisible, async (val) => {
+    if (val) {
+        await getCategories()
+        await getLangs()
+    }
 }, { immediate: true })
 </script>

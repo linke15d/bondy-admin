@@ -9,7 +9,7 @@
                 </el-form-item>
             </el-row>
             <el-table :data="tableList" style="width: 100%" size="small">
-                <el-table-column prop="name" label="分类名称" align="center" width="100" show-overflow-tooltip
+                <el-table-column prop="default_name" label="分类名称" align="center" width="100" show-overflow-tooltip
                     :formatter="tableFormatterFn" />
                 <el-table-column label="状态" align="center">
                     <template #default="{ row }">
@@ -18,8 +18,8 @@
                 </el-table-column>
                 <el-table-column prop="created_at" label="创建时间" align="center" show-overflow-tooltip
                     :formatter="tableFormatterFn" />
-                <el-table-column prop="updated_at" label="更新时间" align="center" show-overflow-tooltip
-                    :formatter="tableFormatterFn" />
+                <!-- <el-table-column prop="updated_at" label="更新时间" align="center" show-overflow-tooltip
+                    :formatter="tableFormatterFn" /> -->
                 <el-table-column label="操作" align="center" fixed="right">
                     <template #default="{ row }">
                         <el-button type="warning" @click="onWrite(row)">
@@ -73,10 +73,7 @@ const onClose = (type) => {
 const onQueryList = async () => {
     const res = await categoriesQuery()
     if (res.code === 0) {
-        tableList.value = res.data.map((val: any) => ({
-            ...val,
-            name: val.names.find((e: any) => e.language_code === 'zh-CN')?.name || ''
-        }))
+        tableList.value = res.data
     }
 }
 
