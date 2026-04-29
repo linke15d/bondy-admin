@@ -10,7 +10,7 @@
                 </el-col>
                 <el-col :span="4">
                     <el-form-item label="用户状态">
-                        <el-select v-model="form.is_blocked" clearable>
+                        <el-select class="!w-full" v-model="form.is_blocked" clearable>
                             <el-option label="全部" value="" />
                             <el-option label="正常" :value="false" />
                             <el-option label="禁用" :value="true" />
@@ -70,7 +70,7 @@
                 :total="totalPages" @size-change="handleSizeChange" @current-change="handleCurrentChange" />
         </el-card>
 
-        <PositionEdit :dialogVisible="dialogVisible" :itemData="itemData" @close="dialogVisible = false" />
+        <PositionEdit :dialogVisible="dialogVisible" :itemData="itemData" @close="onClose" />
     </el-form>
 </template>
 
@@ -106,6 +106,11 @@ const onChangeState = async (id, type) => {
     //     ElMessage.success('操作成功')
     //     onQueryList()
     // }
+}
+
+const onClose = (type) => {
+    if (type) onQueryList()
+    dialogVisible.value = false
 }
 
 const onQueryList = async () => {

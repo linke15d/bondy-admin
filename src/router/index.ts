@@ -118,6 +118,30 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
     ]
   },
   {
+    path: '/lang',
+    component: Layout,
+    redirect: '/lang',
+    name: 'Lang',
+    meta: {
+      title: '语言管理',
+      icon: 'lucide:languages',
+      alwaysShow: true
+    },
+    children: [
+      {
+        path: 'langList',
+        component: () => import('@/views/Lang/LangList.vue'),
+        name: 'LangList',
+        meta: {
+          title: '语言列表',
+          icon: '',
+          noCache: true,
+          affix: true
+        },
+      },
+    ]
+  },
+  {
     path: '/content',
     component: Layout,
     redirect: '/content',

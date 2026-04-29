@@ -1,13 +1,19 @@
 <template>
     <ElDialog :model-value="dialogVisible" :title="itemData?.id ? '编辑姿势' : '新增姿势'" width="450" center
         @close="onClose()">
-        <el-form :model="form" :rules="rules" ref="formRef" size="small" label-width="60">
-            <el-form-item label="分类" prop="category">
-                <el-select v-model="form.category" placeholder="请选择分类" class="w-full" clearable>
+        <el-form :model="form" :rules="rules" ref="ruleFormRef" size="small" label-width="70">
+            <el-form-item label="姿势分类" prop="category">
+                <el-select v-model="form.category" placeholder="请选择姿势分类" class="w-full" clearable>
                     <el-option label="经典" value="CLASSIC" />
+                    <el-option label="探险" value="ADVENTURE" />
+                    <el-option label="亲密" value="INTIMATE" />
+                    <el-option label="趣味" value="FUN" />
                 </el-select>
             </el-form-item>
-            <el-form-item label="图标" prop="icon">
+            <el-form-item label="姿势名称" prop="name">
+                <el-input v-model="form.name" placeholder="请输入姿势名称" clearable />
+            </el-form-item>
+            <el-form-item label="姿势图标" prop="icon_base64">
                 <template #default>
                     <div class="w-full flex">
                         <el-upload accept="image/*" :http-request="uploadHttpClose" :auto-upload="true"
@@ -24,12 +30,17 @@
                 </template>
             </el-form-item>
         </el-form>
+        <template #footer>
+            <el-button @click="onClose">取消</el-button>
+            <el-button type="primary" @click="onSave">保存</el-button>
+        </template>
     </ElDialog>
 </template>
 
 <script setup lang="ts">
 import { ElMessage, UploadProps } from 'element-plus'
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
+import { positionCreate } from '../service'
 
 const props = defineProps({
     dialogVisible: { type: Boolean, default: false },
@@ -44,8 +55,11 @@ const defaultForm = {
 }
 const form = reactive({ ...defaultForm })
 const rules = reactive({
-
+    category: [{ required: true, message: '请选择姿势分类', trigger: ['blur', 'change'] }],
+    name: [{ required: true, message: '请姿势名称', trigger: ['blur', 'change'] }],
+    icon_base64: [{ required: true, message: '请上传图标', trigger: ['blur', 'change'] }],
 })
+const ruleFormRef = ref()
 
 const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
     if (rawFile.type !== 'image/jpeg' && rawFile.type !== 'image/png') {
@@ -59,17 +73,33 @@ const beforeAvatarUpload: UploadProps['beforeUpload'] = (rawFile) => {
     return true;
 };
 
+const onSave = async () => {
+    await ruleFormRef.value.validate(async (valid) => {
+        if (!valid) return
+        const res = await positionCreate(Object.assign({ ...form }))
+        if (res.code === 0) {
+            ElMessage.success('操作成功')
+            emit('close', true)
+            resetForm()
+        }
+    });
+}
+
 const uploadHttpClose = async ({ file }) => {
-    // const res: any = await fileUpload(file);
-    // if (res.success) {
-    //     form.icon = res.data.url
-    //     ElMessage({ type: 'success', message: '图片上传成功！' });
-    // } else {
-    //     ElMessage.error(res.msg)
-    // }
+    const reader = new FileReader()
+    reader.onload = (e) => {
+        form.icon_base64 = e.target?.result as string
+    }
+    reader.readAsDataURL(file)
 };
 
+const resetForm = () => {
+    ruleFormRef.value?.resetFields()
+    Object.assign(form, JSON.parse(JSON.stringify(defaultForm)))
+}
+
 const onClose = () => {
-    emit('close')
+    emit('close', false)
+    resetForm()
 }
 </script>
