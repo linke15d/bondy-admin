@@ -1,12 +1,12 @@
 <template>
-    <ElDialog :model-value="dialogVisible" :title="itemData?.id ? '编辑地点' : '新增地点'" width="450" center
+    <ElDialog :model-value="dialogVisible" :title="itemData?.id ? '编辑标签' : '新增标签'" width="450" center
         @close="onClose()">
         <el-form :model="form" :rules="rules" ref="ruleFormRef" size="small" label-width="80">
-            <div class="mb-2">地点名称</div>
+            <div class="mb-2">标签名称</div>
             <el-form-item v-for="(v, i) in langList" :key="v.id" :label="v.name">
-                <el-input v-model="form.names[i].name" placeholder="请输入地点名称" clearable />
+                <el-input v-model="form.names[i].name" placeholder="请输入标签名称" clearable />
             </el-form-item>
-            <el-form-item label="地点图标" prop="icon_base64">
+            <el-form-item label="标签图标" prop="icon_base64">
                 <template #default>
                     <div class="w-full flex">
                         <el-upload accept="image/*" :http-request="uploadHttpClose" :auto-upload="true"
@@ -43,7 +43,7 @@
 <script setup lang="ts">
 import { ElMessage, UploadProps } from 'element-plus'
 import { reactive, ref, watch } from 'vue'
-import { locationsCreate, locationsUpdate } from '../service'
+import { tagsCreate, tagsUpdate } from '../service'
 import { langQuery } from '@/views/Lang/service'
 import { sanitizePositive } from '@/utils/numbers'
 import { isFieldEmpty } from '@/utils/format'
@@ -80,7 +80,7 @@ const onSave = async () => {
     await ruleFormRef.value.validate(async (valid) => {
         if (!valid) return
         if (isFieldEmpty(form.names, 'name')) return ElMessage.error('请输入全部名称')
-        const apiUrl = props.itemData.id ? locationsUpdate : locationsCreate
+        const apiUrl = props.itemData.id ? tagsUpdate : tagsCreate
         const res = await apiUrl(Object.assign({ ...form }, { sort_order: Number(form.sort_order) }))
         if (res.code === 0) {
             ElMessage.success('操作成功')

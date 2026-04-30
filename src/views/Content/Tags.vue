@@ -4,8 +4,8 @@
             <el-row :gutter="20">
 
                 <el-col :span="4">
-                    <el-form-item label="地点名称">
-                        <el-input v-model="form.keyword" placeholder="请输入地点名称" clearable />
+                    <el-form-item label="标签名称">
+                        <el-input v-model="form.keyword" placeholder="请输入标签名称" clearable />
                     </el-form-item>
                 </el-col>
                 <el-col :span="4">
@@ -35,9 +35,9 @@
                 </el-form-item>
             </el-row>
             <el-table :data="tableList" style="width: 100%" size="small">
-                <el-table-column prop="default_name" label="地点名称" align="center" width="100" show-overflow-tooltip
+                <el-table-column prop="default_name" label="标签名称" align="center" width="100" show-overflow-tooltip
                     :formatter="tableFormatterFn" />
-                <el-table-column prop="icon_base64" label="地点图标" align="center">
+                <el-table-column prop="icon_base64" label="标签图标" align="center">
                     <template #default="{ row }">
                         <el-image :src="row.icon_base64" class="w-10 h-10" />
                     </template>
@@ -74,17 +74,17 @@
                 :total="totalCount" @size-change="handleSizeChange" @current-change="handleCurrentChange" />
         </el-card>
 
-        <LocationEdit :dialogVisible="dialogVisible" :itemData="itemData" @close="onClose" />
+        <TagEdit :dialogVisible="dialogVisible" :itemData="itemData" @close="onClose" />
     </el-form>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onActivated, reactive } from 'vue'
-import { locationsQuery,locationsDelete } from './service';
+import { tagsQuery,tagsDelete } from './service';
 import { tableFormatterFn } from '@/utils/format';
 import { ElMessage } from 'element-plus';
 import { tagType } from '@/utils/tagType';
-import LocationEdit from './components/LocationEdit.vue';
+import TagEdit from './components/TagEdit.vue';
 
 const defaultForm = {
     page: 1,
@@ -105,7 +105,7 @@ const onWrite = (data) => {
 }
 
 const onDelete = async (id) => {
-    const res = await locationsDelete({ id })
+    const res = await tagsDelete({ id })
     if (res.code === 0) {
         ElMessage.success('操作成功')
         onQueryList()
@@ -118,7 +118,7 @@ const onClose = (type) => {
 }
 
 const onQueryList = async () => {
-    const res = await locationsQuery(form)
+    const res = await tagsQuery(form)
     if (res.code === 0) {
         tableList.value = res.data.list
         totalCount.value = res.data.total

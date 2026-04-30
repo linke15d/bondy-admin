@@ -48,3 +48,19 @@ export const locationsCreate = (data?): Promise<IResp> => {
 export const locationsUpdate = (data?): Promise<IResp> => {
     return request.post({ url: '/admin/v1/content/locations/update', data })
 }
+//标签列表
+export const tagsQuery = (data?): Promise<IResp> => {
+    return request.post({ url: '/admin/v1/content/tags/list', data })
+}
+//标签新增
+export const tagsCreate = (data?): Promise<IResp> => {
+    return request.post({ url: '/admin/v1/content/tags/create', data })
+}
+//标签更新
+export const tagsUpdate = (data?): Promise<IResp> => {
+    return request.post({ url: '/admin/v1/content/tags/update', data })
+}
+//标签删除
+export const tagsDelete = (data?): Promise<IResp> => {
+    return request.post({ url: '/admin/v1/content/tags/delete', data })
+}

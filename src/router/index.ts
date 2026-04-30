@@ -180,6 +180,16 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
           noCache: true,
         },
       },
+      {
+        path: 'tags',
+        component: () => import('@/views/Content/Tags.vue'),
+        name: 'Tags',
+        meta: {
+          title: '标签列表',
+          icon: '',
+          noCache: true,
+        },
+      },
     ]
   },
 ]
