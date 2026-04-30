@@ -99,7 +99,6 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
           title: '用户列表',
           icon: '',
           noCache: true,
-          affix: true
         },
         children: [
           {
@@ -110,7 +109,7 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
               title: '用户详情',
               icon: '',
               noCache: true,
-              affix: true
+              hidden: true
             }
           }
         ]
@@ -136,7 +135,6 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
           title: '语言列表',
           icon: '',
           noCache: true,
-          affix: true
         },
       },
     ]
@@ -160,7 +158,6 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
           title: '姿势分类列表',
           icon: '',
           noCache: true,
-          affix: true
         },
       },
       {
@@ -171,18 +168,16 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
           title: '姿势列表',
           icon: '',
           noCache: true,
-          affix: true
         },
       },
       {
-        path: 'tags',
-        component: () => import('@/views/Content/Tags.vue'),
-        name: 'Tags',
+        path: 'location',
+        component: () => import('@/views/Content/Location.vue'),
+        name: 'Location',
         meta: {
-          title: '标签列表',
+          title: '地址列表',
           icon: '',
           noCache: true,
-          affix: true
         },
       },
     ]

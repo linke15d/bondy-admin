@@ -32,3 +32,19 @@ export const categoriesDelete = (data?): Promise<IResp> => {
 export const categoriesUpdate = (data?): Promise<IResp> => {
     return request.post({ url: '/admin/v1/content/categories/update', data })
 }
+//地点列表
+export const locationsQuery = (data?): Promise<IResp> => {
+    return request.post({ url: '/admin/v1/content/locations/list', data })
+}
+//地点删除
+export const locationsDelete = (data?): Promise<IResp> => {
+    return request.post({ url: '/admin/v1/content/locations/delete', data })
+}
+//地点新增
+export const locationsCreate = (data?): Promise<IResp> => {
+    return request.post({ url: '/admin/v1/content/locations/create', data })
+}
+//地点更新
+export const locationsUpdate = (data?): Promise<IResp> => {
+    return request.post({ url: '/admin/v1/content/locations/update', data })
+}

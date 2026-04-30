@@ -2,18 +2,11 @@
     <ElDialog :model-value="dialogVisible" :title="itemData?.id ? '编辑姿势' : '新增姿势'" width="450" center
         @close="onClose()">
         <el-form :model="form" :rules="rules" ref="ruleFormRef" size="small" label-width="80">
-            <el-form-item label="姿势分类" prop="category_id">
-                <el-select v-model="form.category_id" placeholder="请选择姿势分类" class="w-full" :disabled="itemData?.id"
-                    clearable>
-                    <el-option v-for="v in categories" :key="v.id" :label="v.default_name" :value="v.id" />
-                </el-select>
-            </el-form-item>
-            <div class="mb-2">姿势名称</div>
+            <div class="mb-2">地点名称</div>
             <el-form-item v-for="(v, i) in langList" :key="v.id" :label="v.name">
-                <el-input v-model="form.names[i].name" placeholder="请输入姿势名称"
-                    :disabled="itemData?.id && form.names[i].name" clearable />
+                <el-input v-model="form.names[i].name" placeholder="请输入姿势名称" clearable />
             </el-form-item>
-            <el-form-item label="姿势图标" prop="icon_base64">
+            <el-form-item label="地点图标" prop="icon_base64">
                 <template #default>
                     <div class="w-full flex">
                         <el-upload accept="image/*" :http-request="uploadHttpClose" :auto-upload="true"
@@ -35,6 +28,10 @@
                     <el-option label="禁用" :value="false" />
                 </el-select>
             </el-form-item>
+            <el-form-item label="排序">
+                <el-input v-model="form.sort_order" placeholder="请输入排序" clearable
+                    @input="v => form.sort_order = sanitizePositive(v, { decimals: 0 })" />
+            </el-form-item>
         </el-form>
         <template #footer>
             <el-button @click="onClose">取消</el-button>
@@ -46,8 +43,9 @@
 <script setup lang="ts">
 import { ElMessage, UploadProps } from 'element-plus'
 import { reactive, ref, watch } from 'vue'
-import { positionCreate, categoriesQuery, positionUpdate } from '../service'
+import { locationsCreate, categoriesQuery, locationsUpdate } from '../service'
 import { langQuery } from '@/views/Lang/service'
+import { sanitizePositive } from '@/utils/numbers'
 import { isFieldEmpty } from '@/utils/format'
 
 const props = defineProps({
@@ -58,14 +56,13 @@ const emit = defineEmits(['close'])
 
 const defaultForm = {
     id: '',
-    category_id: '',
+    sort_order: '',
     icon_base64: '',
     is_active: true,
     names: [] as { language_code: string, name: string }[],
 }
 const form = reactive({ ...defaultForm })
 const rules = reactive({
-    category_id: [{ required: true, message: '请选择姿势分类', trigger: ['blur', 'change'] }],
     icon_base64: [{ required: true, message: '请上传图标', trigger: ['blur', 'change'] }],
 })
 const ruleFormRef = ref()
@@ -84,8 +81,8 @@ const onSave = async () => {
     await ruleFormRef.value.validate(async (valid) => {
         if (!valid) return
         if (isFieldEmpty(form.names, 'name')) return ElMessage.error('请输入全部名称')
-        const apiUrl = props.itemData.id ? positionUpdate : positionCreate
-        const res = await apiUrl(Object.assign({ ...form }))
+        const apiUrl = props.itemData.id ? locationsUpdate : locationsCreate
+        const res = await apiUrl(Object.assign({ ...form }, { sort_order: Number(form.sort_order) }))
         if (res.code === 0) {
             ElMessage.success('操作成功')
             emit('close', true)
@@ -120,7 +117,7 @@ const getLangs = async () => {
     // 回显其他字段
     if (props.itemData?.id) {
         form.id = props.itemData.id
-        form.category_id = props.itemData.category_id
+        form.sort_order = props.itemData.sort_order
         form.icon_base64 = props.itemData.icon_base64
         form.is_active = props.itemData.is_active
     }

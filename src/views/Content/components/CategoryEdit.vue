@@ -54,7 +54,7 @@ const langList = ref<any>([])
 const onSave = async () => {
     await ruleFormRef.value.validate(async (valid) => {
         if (!valid) return
-        if (isFieldEmpty(form.names, 'name')) return ElMessage.error('请输入分类名称')
+        if (isFieldEmpty(form.names, 'name')) return ElMessage.error('请输入全部名称')
         const apiUrl = props.itemData.id ? categoriesUpdate : categoriesCreate
         const res = await apiUrl(Object.assign({ ...form }, { sort_order: Number(form.sort_order) }))
         if (res.code === 0) {
