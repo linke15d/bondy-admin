@@ -192,6 +192,29 @@ export const asyncRouterMap: AppRouteRecordRaw[] = [
       },
     ]
   },
+  {
+    path: '/record',
+    component: Layout,
+    redirect: '/record',
+    name: 'Record',
+    meta: {
+      title: '记录管理',
+      icon: 'material-symbols-light:add-notes',
+      alwaysShow: true
+    },
+    children: [
+      {
+        path: 'recordList',
+        component: () => import('@/views/Record/RecordList.vue'),
+        name: 'RecordList',
+        meta: {
+          title: '记录列表',
+          icon: '',
+          noCache: true,
+        },
+      },
+    ]
+  },
 ]
 
 const router = createRouter({
